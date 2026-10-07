@@ -40,10 +40,10 @@ const restaurantSchema = new Schema(
             required: [true, 'City is required'],
             trim: true,
         },
-        // image: {
-        //     type: String,
-        //     default: '', // Image URL ya Cloudinary/Supabase file path
-        // },
+        image: {
+            type: String,
+            default: '', // Image URL ya Cloudinary/Supabase file path
+        },
         openingTime: {
             type: String,
             default: '09:00 AM', // Format e.g., "09:00 AM" ya "09:00"

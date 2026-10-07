@@ -1,60 +1,38 @@
-import Category from '../models/Category.js';
+import Category from '../models/catgory.js';
 import Restaurant from '../models/restaurant.js';
 
-// 1. Create Category
+// 1. POST /api/restaurants/:restaurantId/categories
 export const createCategory = async (req, res) => {
     try {
-        const { name, description, image, sortOrder, restaurant } = req.body;
+        const { restaurantId } = req.params;
+        const { name, description, image,sortOrder } = req.body;
 
         if (!name) {
-            return res.status(400).json({
-                success: false,
-                message: "Category name is required."
-            });
+            return res.status(400).json({ success: false, message: "Category name is required." });
         }
 
-        // Multi-tenancy target restaurant determination
-        let targetRestaurantId;
-        if (req.user.role === 'SUPER_ADMIN') {
-            targetRestaurantId = restaurant;
-            if (!targetRestaurantId) {
-                return res.status(400).json({
-                    success: false,
-                    message: "Restaurant ID is required when creating category as Super Admin."
-                });
-            }
-        } else if (req.user.role === 'ADMIN') {
-            targetRestaurantId = req.user.restaurantId;
+        // Verification: Restaurant exists or not
+        const restaurant = await Restaurant.findById(restaurantId);
+        if (!restaurant) {
+            return res.status(404).json({ success: false, message: "Restaurant not found." });
         }
 
-        // Verify Restaurant exists
-        const restaurantExists = await Restaurant.findById(targetRestaurantId);
-        if (!restaurantExists) {
-            return res.status(404).json({
-                success: false,
-                message: "Associated restaurant not found."
-            });
-        }
-
-        // Duplicate Category Check for the SAME Restaurant
+        // Duplicate category check for the same restaurant
         const existingCategory = await Category.findOne({
             name: { $regex: new RegExp(`^${name.trim()}$`, 'i') },
-            restaurant: targetRestaurantId
+            restaurant: restaurantId
         });
 
         if (existingCategory) {
-            return res.status(400).json({
-                success: false,
-                message: "A category with this name already exists in this restaurant."
-            });
+            return res.status(400).json({ success: false, message: "Category name already exists in this restaurant." });
         }
 
         const category = await Category.create({
             name,
-            description,
             image,
-            sortOrder: sortOrder !== undefined ? sortOrder : 0,
-            restaurant: targetRestaurantId
+            description,
+            sortOrder: sortOrder ?? 0,
+            restaurant: restaurantId
         });
 
         return res.status(201).json({
@@ -62,28 +40,20 @@ export const createCategory = async (req, res) => {
             message: "Category created successfully!",
             data: category
         });
-
     } catch (error) {
-        return res.status(500).json({
-            success: false,
-            message: error.message
-        });
+        return res.status(500).json({ success: false, message: error.message });
     }
 };
 
-// 2. Get All Categories for a Restaurant (Sorted by sortOrder)
+// 2. GET /api/restaurants/:restaurantId/categories
 export const getCategoriesByRestaurant = async (req, res) => {
     try {
         const { restaurantId } = req.params;
 
-        // Public/Customer ke liye sirf active categories, jabke logged-in admin ke liye sab
         const filter = { restaurant: restaurantId };
-        
-        const isAuthorizedAdmin = 
-            req.user?.role === 'SUPER_ADMIN' || 
-            (req.user?.role === 'ADMIN' && req.user?.restaurantId?.toString() === restaurantId);
 
-        if (!isAuthorizedAdmin) {
+        // Agar public/customer browser request hai toh sirf active categories show hongi
+        if (!req.user || req.user.role === 'CUSTOMER') {
             filter.isActive = true;
         }
 
@@ -94,41 +64,39 @@ export const getCategoriesByRestaurant = async (req, res) => {
             count: categories.length,
             data: categories
         });
-
     } catch (error) {
-        return res.status(500).json({
-            success: false,
-            message: error.message
-        });
+        return res.status(500).json({ success: false, message: error.message });
     }
 };
 
-// 3. Update Category
-export const updateCategory = async (req, res) => {
+// 3. GET /api/categories/:categoryId
+export const getCategoryById = async (req, res) => {
     try {
-        const { id } = req.params;
+        const { categoryId } = req.params;
 
-        const category = await Category.findById(id);
+        const category = await Category.findById(categoryId).populate('restaurant', 'name isActive');
         if (!category) {
-            return res.status(404).json({
-                success: false,
-                message: "Category not found."
-            });
+            return res.status(404).json({ success: false, message: "Category not found." });
         }
 
-        // Multi-tenancy ownership validation
-        const isSuperAdmin = req.user.role === 'SUPER_ADMIN';
-        const isOwningAdmin = req.user.role === 'ADMIN' && req.user.restaurantId?.toString() === category.restaurant.toString();
+        return res.status(200).json({ success: true, data: category });
+    } catch (error) {
+        return res.status(500).json({ success: false, message: error.message });
+    }
+};
 
-        if (!isSuperAdmin && !isOwningAdmin) {
-            return res.status(403).json({
-                success: false,
-                message: "Access denied. You cannot modify categories of another restaurant."
-            });
+// 4. PATCH /api/categories/:categoryId
+export const updateCategory = async (req, res) => {
+    try {
+        const { categoryId } = req.params;
+
+        const category = await Category.findById(categoryId);
+        if (!category) {
+            return res.status(404).json({ success: false, message: "Category not found." });
         }
 
         const updatedCategory = await Category.findByIdAndUpdate(
-            id,
+            categoryId,
             { $set: req.body },
             { new: true, runValidators: true }
         );
@@ -138,50 +106,28 @@ export const updateCategory = async (req, res) => {
             message: "Category updated successfully!",
             data: updatedCategory
         });
-
     } catch (error) {
-        return res.status(500).json({
-            success: false,
-            message: error.message
-        });
+        return res.status(500).json({ success: false, message: error.message });
     }
 };
 
-// 4. Delete Category (Soft or Hard Delete)
+// 5. DELETE /api/categories/:categoryId
 export const deleteCategory = async (req, res) => {
     try {
-        const { id } = req.params;
+        const { categoryId } = req.params;
 
-        const category = await Category.findById(id);
+        const category = await Category.findById(categoryId);
         if (!category) {
-            return res.status(404).json({
-                success: false,
-                message: "Category not found."
-            });
+            return res.status(404).json({ success: false, message: "Category not found." });
         }
 
-        // Multi-tenancy ownership validation
-        const isSuperAdmin = req.user.role === 'SUPER_ADMIN';
-        const isOwningAdmin = req.user.role === 'ADMIN' && req.user.restaurantId?.toString() === category.restaurant.toString();
-
-        if (!isSuperAdmin && !isOwningAdmin) {
-            return res.status(403).json({
-                success: false,
-                message: "Access denied. You cannot delete categories of another restaurant."
-            });
-        }
-
-        await Category.findByIdAndDelete(id);
+        await Category.findByIdAndDelete(categoryId);
 
         return res.status(200).json({
             success: true,
             message: "Category deleted successfully!"
         });
-
     } catch (error) {
-        return res.status(500).json({
-            success: false,
-            message: error.message
-        });
+        return res.status(500).json({ success: false, message: error.message });
     }
 };

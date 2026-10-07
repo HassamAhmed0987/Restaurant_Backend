@@ -1,16 +1,22 @@
-import { Router } from "express";
-import { getCategoriesByRestaurant } from "../controllers/categoryController.js";
+import { Router } from 'express';
+import {
+    createCategory,
+    getCategoriesByRestaurant,
+    getCategoryById,
+    updateCategory,
+    deleteCategory
+} from '../controllers/categoryController.js';
+import { authenticate, authorize } from '../middleware/authMiddleware.js';
 
+const router = Router();
 
+// Public routes
+router.get('/categories/:categoryId', getCategoryById);
+router.get('/restaurants/:restaurantId/categories', getCategoriesByRestaurant);
 
-const router = Router()
+// Private Routes
+router.post('/:restaurantId/categories', authenticate, authorize('super_admin', 'admin'), createCategory);
+router.patch('/categories/:categoryId', authenticate, authorize('super_admin', 'admin'), updateCategory);
+router.delete('/categories/:categoryId', authenticate, authorize('super_admin', 'admin'), deleteCategory);
 
-
-router.get("/:restaurantId/categories", getCategoriesByRestaurant)
-
-
-
-
-
-
-export default router
+export default router;

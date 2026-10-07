@@ -3,7 +3,7 @@ import cors from "cors"
 import authRoutes from "./src/routes/authRoute.js"
 import UserRoutes from "./src/routes/userRoutes.js"
 import RestaurantRoute from "./src/routes/restaurantRoutes.js"
-
+import CategoryRoute from "./src/routes/categoryRoutes.js"
 
 const app = express()
 
@@ -14,6 +14,7 @@ app.use(express.json())
 app.use("/api/auth", authRoutes)
 app.use("/api/users", UserRoutes)
 app.use("/api/restaurants", RestaurantRoute)
+app.use("/api/restaurants", CategoryRoute)
 
 app.get("/", (req, res) => {
     res.json({
