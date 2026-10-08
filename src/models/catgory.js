@@ -17,10 +17,10 @@ const categorySchema = new Schema(
             trim: true,
             default: '',
         },
-        // image: {
-        //     type: String,
-        //     default: '',
-        // },
+        image: {
+            type: String,
+            default: '',
+        },
         sortOrder: {
             type: Number,
             default: 0, 

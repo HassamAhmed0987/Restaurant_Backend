@@ -1,7 +1,4 @@
 
-
-
-
 export const checkRestaurantOwnership = (req, res, next) => {
     try {
 
@@ -12,7 +9,7 @@ export const checkRestaurantOwnership = (req, res, next) => {
 
         const targetedRestaurant = req.params.restaurantId
 
-        if (!req.user.restaurantId || req.user.restaurantId.toString() !== targetRestaurantId) {
+        if (!req.user.restaurantId || req.user.restaurantId.toString() !== targetedRestaurant) {
             return res.status(403).json({
                 success: false,
                 message: 'Forbidden: You are not authorized to manage or access another restaurant\'s data.'
