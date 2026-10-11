@@ -1,0 +1,45 @@
+meta {
+  name: Login customer - save customerToken
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/api/auth/login
+  body: json
+  auth: none
+}
+
+headers {
+  content-type: application/json
+}
+
+body:json {
+  {
+    "email": "{{customerEmail}}", 
+    "password": "{{customerPassword}}"
+  }
+}
+
+vars:pre-request {
+  baseUrl: http://localhost:3002
+}
+
+script:post-response {
+   
+  const body = res.getBody(); 
+  if (res.getStatus() === 200 && body && body.success === true && body.data && body.data.accessToken) { 
+    bru.setEnvVar("customerToken", body.data.accessToken); 
+    console.log("Saved customerToken from successful customer login."); 
+    } else { 
+      console.log("Customer login failed or accessToken was missing; existing customerToken was not changed."); 
+      } 
+}
+
+tests {
+   
+  test("successful login returns accessToken", function () { 
+    expect(res.getStatus()).to.equal(200); 
+    expect(res.getBody().data).to.have.property("accessToken"); 
+    }); 
+}

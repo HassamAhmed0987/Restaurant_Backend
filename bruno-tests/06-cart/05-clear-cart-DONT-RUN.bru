@@ -1,0 +1,17 @@
+meta {
+  name: Clear cart (customer - destructive)
+  type: http
+  seq: 5
+}
+delete {
+  url: {{baseUrl}}/api/cart
+}
+headers {
+  authorization: Bearer {{customerToken}}
+}
+tests { 
+  test("cart cleared", 
+  function () { 
+    expect(res.getStatus()).to.equal(200); 
+  }); 
+}

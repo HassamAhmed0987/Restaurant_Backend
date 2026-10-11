@@ -1,0 +1,26 @@
+meta {
+  name: Add unavailable menu item (requires an unavailable item ID)
+  type: http
+  seq: 9
+}
+post {
+  url: {{baseUrl}}/api/cart/items
+  body: json
+}
+headers {
+  authorization: Bearer {{customerToken}}
+  content-type: application/json
+}
+body:json {
+  {
+    "menuItemId": "{{menuItemId}}", 
+    "quantity": 1
+  }
+}
+tests { 
+  test("unavailable item rejected", 
+  function () { 
+    expect(res.getStatus()).to.equal(400); 
+    expect(res.getBody().message).to.equal("Menu item is currently unavailable."); 
+  }); 
+}

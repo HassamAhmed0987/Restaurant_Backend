@@ -1,0 +1,29 @@
+meta {
+  name: Create restaurant admin (super admin)
+  type: http
+  seq: 1
+}
+post {
+  url: {{baseUrl}}/api/users/create-admin
+  body: json
+}
+headers {
+  authorization: Bearer {{superAdminToken}}
+  content-type: application/json
+}
+body:json {
+  {
+    "name": "Bruno Restaurant Admin", 
+    "email": "bruno-admin@example.com", 
+    "password": "replace-with-6-or-more-characters", 
+    "phone": "+10000000000", 
+    "restaurantId": "{{restaurantId}}"
+  }
+}
+tests { 
+  test("admin created", 
+  function () { 
+    expect(res.getStatus()).to.equal(201); 
+    expect(res.getBody().data.role).to.equal("admin"); 
+  }); 
+}

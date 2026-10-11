@@ -1,0 +1,26 @@
+meta { 
+  name: Update menu item (unreachable; executes update restaurant); 
+  type: http; 
+  seq: 4 
+}
+put {
+  url: {{baseUrl}}/api/restaurants/{{menuItemId}}
+  body: json
+}
+headers {
+  authorization: Bearer {{adminToken}}
+  content-type: application/json
+}
+body:json {
+  {
+    "name": "Bruno Test Burger Updated", 
+    "price": 13, 
+    "isAvailable": true
+  }
+}
+tests { 
+  test("actual route may update restaurant if admin is assigned to this id", 
+  function () { 
+    expect(res.getStatus()).to.be.oneOf([200, 403, 404]);
+  }); 
+}

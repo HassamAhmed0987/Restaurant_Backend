@@ -1,0 +1,22 @@
+meta {
+  name: Toggle restaurant status (super admin - state changing)
+  type: http
+  seq: 5
+}
+patch {
+  url: {{baseUrl}}/api/restaurants/{{restaurantId}}/status
+  body: json
+}
+headers {
+  authorization: Bearer {{superAdminToken}}
+  content-type: application/json
+}
+body:json {
+  {
+    "isActive": true
+  }
+}
+tests { test("status updated", function () { 
+  expect(res.getStatus()).to.equal(200); 
+  }); 
+}

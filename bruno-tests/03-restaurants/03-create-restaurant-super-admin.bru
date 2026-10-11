@@ -1,0 +1,39 @@
+meta {
+  name: Create restaurant (super admin)
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/api/restaurants
+  body: json
+  auth: none
+}
+
+headers {
+  authorization: Bearer {{superAdminToken}}
+  content-type: application/json
+}
+
+body:json {
+  {
+    "name": "Bruno Test Restaurant", 
+    "description": "Created only in a dedicated test database", 
+    "phone": "+10000000000", 
+    "email": "bruno-test-restaurant@example.com", 
+    "address": "1 Test Street", 
+    "city": "Test City", 
+    "openingTime": "09:00 AM", 
+    "closingTime": "11:00 PM"
+  }
+}
+
+vars:pre-request {
+  baseUrl: http://localhost:3002
+}
+
+tests {
+   test("created", function () { 
+  expect(res.getStatus()).to.equal(201); 
+  }); 
+}

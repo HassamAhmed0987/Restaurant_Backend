@@ -1,0 +1,23 @@
+meta {
+  name: Update my profile (customer)
+  type: http
+  seq: 2
+}
+patch {
+  url: {{baseUrl}}/api/users/me
+  body: json
+}
+headers {
+  authorization: Bearer {{customerToken}}
+  content-type: application/json
+}
+body:json {
+  {
+    "name": "Bruno Test Customer", 
+    "phone": "+10000000000"
+  }
+}
+tests { test("profile updated", function () { 
+  expect(res.getStatus()).to.equal(200); 
+  });
+}

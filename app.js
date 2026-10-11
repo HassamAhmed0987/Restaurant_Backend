@@ -5,6 +5,9 @@ import UserRoutes from "./src/routes/userRoutes.js"
 import RestaurantRoute from "./src/routes/restaurantRoutes.js"
 import CategoryRoute from "./src/routes/categoryRoutes.js"
 import MenuRoutes from "./src/routes/menuRoutes.js"
+import CartRoutes from "./src/routes/cartRoutes.js"
+import OrderRoutes from "./src/routes/orderRoutes.js"
+
 
 const app = express()
 
@@ -17,6 +20,8 @@ app.use("/api/users", UserRoutes)
 app.use("/api/restaurants", RestaurantRoute)
 app.use("/api/restaurants", CategoryRoute)
 app.use("/api/restaurants", MenuRoutes)
+app.use("/api/cart", CartRoutes)
+app.use("/api/orders", OrderRoutes)
 
 app.get("/", (req, res) => {
     res.json({

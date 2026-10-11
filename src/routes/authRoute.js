@@ -4,8 +4,6 @@ import { authenticate } from "../middleware/authMiddleware.js";
 
 const router = Router()
 
-
-
 router.post("/register", userRegister)
 router.post("/login", userlogin)
 

@@ -1,0 +1,17 @@
+meta {
+  name: List restaurant orders (blocked by ADMIN role casing)
+  type: http
+  seq: 5
+}
+get {
+  url: {{baseUrl}}/api/orders/restaurant/{{restaurantId}}?status=pending
+}
+headers {
+  authorization: Bearer {{adminToken}}
+}
+tests { 
+  test("current middleware rejects lowercase admin role", 
+  function () { 
+    expect(res.getStatus()).to.equal(403); 
+  }); 
+}

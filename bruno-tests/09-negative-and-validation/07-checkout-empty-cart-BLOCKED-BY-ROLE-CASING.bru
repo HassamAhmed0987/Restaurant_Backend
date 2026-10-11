@@ -1,0 +1,25 @@
+meta {
+  name: Checkout empty cart (role middleware blocks first)
+  type: http
+  seq: 7
+}
+post {
+  url: {{baseUrl}}/api/orders
+  body: json
+}
+headers {
+  authorization: Bearer {{customerToken}}
+  content-type: application/json
+}
+body:json {
+  {
+    "deliveryAddress": "1 Test Street", 
+    "phone": "+10000000000"
+  }
+}
+tests { 
+  test("current middleware returns forbidden before empty-cart logic", 
+  function () { 
+    expect(res.getStatus()).to.equal(403); 
+  }); 
+}

@@ -1,0 +1,25 @@
+meta {
+  name: Add cart item with invalid quantity
+  type: http
+  seq: 5
+}
+post {
+  url: {{baseUrl}}/api/cart/items
+  body: json
+}
+headers {
+  authorization: Bearer {{customerToken}}
+  content-type: application/json
+}
+body:json {
+  {
+    "menuItemId": "{{menuItemId}}", 
+    "quantity": 0
+  }
+}
+tests { 
+  test("quantity validation error", 
+  function () { 
+    expect(res.getStatus()).to.equal(400); 
+  }); 
+}

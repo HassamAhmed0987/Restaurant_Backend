@@ -1,0 +1,33 @@
+meta { 
+  name: Create menu item (unreachable; executes create restaurant); 
+  type: http; 
+  seq: 3 
+}
+post {
+  url: {{baseUrl}}/api/restaurants
+  body: json
+}
+headers {
+  authorization: Bearer {{adminToken}}
+  content-type: application/json
+}
+body:json {
+  {
+    "restaurant": "{{restaurantId}}", 
+    "category": "{{categoryId}}", 
+    "name": "Bruno Test Burger", 
+    "description": "Test menu item", 
+    "price": 12.5, 
+    "discountPrice": 10, 
+    "image": "", 
+    "ingredients": ["bun", "patty"], 
+    "isAvailable": true, 
+    "preparationTime": 15
+  }
+}
+tests { 
+  test("current routing denies admin before menu controller", 
+  function () { 
+    expect(res.getStatus()).to.equal(403); 
+  }); 
+}

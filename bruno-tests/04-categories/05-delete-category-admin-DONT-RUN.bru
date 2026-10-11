@@ -1,0 +1,15 @@
+meta {
+  name: Delete category (admin - destructive)
+  type: http
+  seq: 5
+}
+delete {
+  url: {{baseUrl}}/api/restaurants/categories/{{categoryId}}
+}
+headers {
+  authorization: Bearer {{adminToken}}
+}
+tests { test("deleted", function () { 
+  expect(res.getStatus()).to.equal(200); 
+  }); 
+}

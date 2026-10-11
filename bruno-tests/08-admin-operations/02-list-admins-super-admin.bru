@@ -1,0 +1,18 @@
+meta {
+  name: List admins (super admin)
+  type: http
+  seq: 2
+}
+get {
+  url: {{baseUrl}}/api/users/admins
+}
+headers {
+  authorization: Bearer {{superAdminToken}}
+}
+tests { 
+  test("lists admins", 
+  function () { 
+    expect(res.getStatus()).to.equal(200); 
+    expect(res.getBody().data).to.be.an("array"); 
+  }); 
+}

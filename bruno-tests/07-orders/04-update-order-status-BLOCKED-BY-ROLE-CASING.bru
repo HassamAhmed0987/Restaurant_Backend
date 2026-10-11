@@ -1,0 +1,25 @@
+meta {
+  name: Update order status (blocked by ADMIN role casing)
+  type: http
+  seq: 4
+}
+patch {
+  url: {{baseUrl}}/api/orders/{{orderId}}/status
+  body: json
+}
+headers {
+  authorization: Bearer {{adminToken}}
+  content-type: application/json
+}
+body:json {
+  {
+    "orderStatus": "confirmed", 
+    "paymentStatus": "pending"
+  }
+}
+tests { 
+  test("current middleware rejects lowercase admin role", 
+  function () { 
+    expect(res.getStatus()).to.equal(403); 
+  }); 
+}

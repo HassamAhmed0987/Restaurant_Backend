@@ -1,0 +1,15 @@
+meta {
+  name: Application root
+  type: http
+  seq: 1
+}
+get {
+  url: {{baseUrl}}/
+}
+tests { 
+  test("backend started", 
+  function () { 
+    expect(res.getStatus()).to.equal(200); 
+    expect(res.getBody().message).to.equal("Restaurant backend started"); 
+  }); 
+}

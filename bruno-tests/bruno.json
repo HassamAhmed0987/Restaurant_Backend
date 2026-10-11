@@ -1,0 +1,6 @@
+{
+  "version": "1",
+  "name": "Restaurant Backend (code-derived)",
+  "type": "collection",
+  "ignore": ["node_modules", ".git"]
+}

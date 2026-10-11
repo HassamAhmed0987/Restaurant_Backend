@@ -2,6 +2,22 @@ import Cart from '../models/cart.js';
 import MenuItem from '../models/menuItem.js';
 import Restaurant from '../models/restaurant.js';
 
+// Helper Function: Cart ke Totals Calculate karne ke liye
+const calculateCartTotals = (cart) => {
+    // Subtotal calculate karein: sum of (price * quantity)
+    const subtotal = cart.items.reduce((acc, item) => acc + (item.price * item.quantity), 0);
+    
+    // Delivery fee & discount read karein (default 0)
+    const deliveryFee = cart.deliveryFee || 0;
+    const discount = cart.discount || 0;
+
+    // Final total calculation
+    const total = subtotal + deliveryFee - discount;
+
+    cart.subtotal = subtotal;
+    cart.total = total < 0 ? 0 : total; // Total negative na ho
+};
+
 // GET /api/cart
 export const getCart = async (req, res) => {
     try {
@@ -12,7 +28,17 @@ export const getCart = async (req, res) => {
             .populate('items.menuItem', 'name image price');
 
         if (!cart) {
-            return res.status(200).json({ success: true, cart: { items: [], restaurant: null } });
+            return res.status(200).json({
+                success: false,
+                cart: {
+                    items: [],
+                    restaurant: null,
+                    subtotal: 0,
+                    deliveryFee: 0,
+                    discount: 0,
+                    total: 0
+                }
+            });
         }
 
         return res.status(200).json({ success: true, cart });
@@ -37,12 +63,12 @@ export const addItem = async (req, res) => {
             return res.status(404).json({ success: false, message: 'Menu item not found.' });
         }
 
-        // 2. Verify Item is available
+        // 2. Verify Item availability
         if (!menuItem.isAvailable) {
             return res.status(400).json({ success: false, message: 'Menu item is currently unavailable.' });
         }
 
-        // 3. Verify Restaurant is active
+        // 3. Verify Restaurant status
         const restaurant = await Restaurant.findById(menuItem.restaurant);
         if (!restaurant || !restaurant.isActive) {
             return res.status(400).json({ success: false, message: 'The restaurant is currently inactive or closed.' });
@@ -50,7 +76,7 @@ export const addItem = async (req, res) => {
 
         let cart = await Cart.findOne({ user: userId });
 
-        // 4. Verify Restaurant matches active cart
+        // 4. Multi-tenancy check (Different restaurant items check)
         if (cart) {
             if (cart.restaurant.toString() !== menuItem.restaurant.toString()) {
                 return res.status(400).json({
@@ -62,12 +88,16 @@ export const addItem = async (req, res) => {
             cart = new Cart({
                 user: userId,
                 restaurant: menuItem.restaurant,
-                items: []
+                items: [],
+                subtotal: 0,
+                deliveryFee: 0,
+                discount: 0,
+                total: 0
             });
         }
 
-        // 5. Price comes strictly from the database
-        const itemPrice = menuItem.price;
+        // Price strictly database se aayegi (use discountPrice if available)
+        const itemPrice = menuItem.discountPrice || menuItem.price;
 
         const itemIndex = cart.items.findIndex(item => item.menuItem.toString() === menuItemId);
 
@@ -81,6 +111,9 @@ export const addItem = async (req, res) => {
                 price: itemPrice
             });
         }
+
+        // Recalculate totals before saving
+        calculateCartTotals(cart);
 
         await cart.save();
 
@@ -128,13 +161,21 @@ export const updateItemQuantity = async (req, res) => {
             }
 
             cart.items[itemIndex].quantity = Number(quantity);
-            cart.items[itemIndex].price = menuItem.price;
+            cart.items[itemIndex].price = menuItem.discountPrice || menuItem.price;
         }
 
+        // Agar cart empty ho jaye to DB se delete kar dein
         if (cart.items.length === 0) {
             await Cart.findByIdAndDelete(cart._id);
-            return res.status(200).json({ success: true, message: 'Cart is now empty', cart: { items: [], restaurant: null } });
+            return res.status(200).json({
+                success: true,
+                message: 'Cart is now empty',
+                cart: { items: [], restaurant: null, subtotal: 0, deliveryFee: 0, discount: 0, total: 0 }
+            });
         }
+
+        // Recalculate totals before save
+        calculateCartTotals(cart);
 
         await cart.save();
 
@@ -163,8 +204,15 @@ export const removeItem = async (req, res) => {
 
         if (cart.items.length === 0) {
             await Cart.findByIdAndDelete(cart._id);
-            return res.status(200).json({ success: true, message: 'Cart cleared because it became empty', cart: { items: [], restaurant: null } });
+            return res.status(200).json({
+                success: true,
+                message: 'Cart cleared because it became empty',
+                cart: { items: [], restaurant: null, subtotal: 0, deliveryFee: 0, discount: 0, total: 0 }
+            });
         }
+
+        // Recalculate totals
+        calculateCartTotals(cart);
 
         await cart.save();
 
@@ -184,7 +232,11 @@ export const clearCart = async (req, res) => {
         const userId = req.user._id;
         await Cart.findOneAndDelete({ user: userId });
 
-        return res.status(200).json({ success: true, message: 'Cart cleared successfully', cart: { items: [], restaurant: null } });
+        return res.status(200).json({
+            success: true,
+            message: 'Cart cleared successfully',
+            cart: { items: [], restaurant: null, subtotal: 0, deliveryFee: 0, discount: 0, total: 0 }
+        });
     } catch (error) {
         return res.status(500).json({ success: false, message: error.message });
     }

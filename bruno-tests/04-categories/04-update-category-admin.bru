@@ -1,0 +1,24 @@
+meta {
+  name: Update category (admin)
+  type: http
+  seq: 4
+}
+patch {
+  url: {{baseUrl}}/api/restaurants/categories/{{categoryId}}
+  body: json
+}
+headers {
+  authorization: Bearer {{adminToken}}
+  content-type: application/json
+}
+body:json {
+  {
+    "name": "Bruno Test Category Updated", 
+    "isActive": true, 
+    "sortOrder": 1
+  }
+}
+tests { test("updated", function () { 
+  expect(res.getStatus()).to.equal(200); 
+  }); 
+}

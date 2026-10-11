@@ -1,0 +1,25 @@
+meta {
+  name: Add cart item with invalid ObjectId
+  type: http
+  seq: 6
+}
+post {
+  url: {{baseUrl}}/api/cart/items
+  body: json
+}
+headers {
+  authorization: Bearer {{customerToken}}
+  content-type: application/json
+}
+body:json {
+  {
+    "menuItemId": "not-an-object-id", 
+    "quantity": 1
+  }
+}
+tests { 
+  test("controller currently surfaces cast error as 500", 
+  function () { 
+    expect(res.getStatus()).to.equal(500); 
+  }); 
+}

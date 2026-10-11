@@ -1,0 +1,17 @@
+meta {
+  name: My orders (blocked by CUSTOMER role casing)
+  type: http
+  seq: 2
+}
+get {
+  url: {{baseUrl}}/api/orders/my-orders
+}
+headers {
+  authorization: Bearer {{customerToken}}
+}
+tests { 
+  test("current middleware rejects lowercase customer role", 
+  function () { 
+    expect(res.getStatus()).to.equal(403); 
+  }); 
+}

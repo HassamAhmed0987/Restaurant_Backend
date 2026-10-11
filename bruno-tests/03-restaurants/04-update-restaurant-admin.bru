@@ -1,0 +1,24 @@
+meta {
+  name: Update assigned restaurant (admin)
+  type: http
+  seq: 4
+}
+put {
+  url: {{baseUrl}}/api/restaurants/{{restaurantId}}
+  body: json
+}
+headers {
+  authorization: Bearer {{adminToken}}
+  content-type: application/json
+}
+body:json {
+  {
+    "description": "Updated through Bruno", 
+    "isOpen": true, 
+    "isActive": false
+  }
+}
+tests { test("updates restaurant when assigned", function () { 
+  expect(res.getStatus()).to.equal(200); 
+  }); 
+}

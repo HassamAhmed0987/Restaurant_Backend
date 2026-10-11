@@ -1,0 +1,25 @@
+meta {
+  name: Create category (admin)
+  type: http
+  seq: 3
+}
+post {
+  url: {{baseUrl}}/api/restaurants/{{restaurantId}}/categories
+  body: json
+}
+headers {
+  authorization: Bearer {{adminToken}}
+  content-type: application/json
+}
+body:json {
+  {
+    "name": "Bruno Test Category", 
+    "description": "Test category", 
+    "image": "", 
+    "sortOrder": 0
+  }
+}
+tests { test("created", function () { 
+  expect(res.getStatus()).to.equal(201); 
+  }); 
+}

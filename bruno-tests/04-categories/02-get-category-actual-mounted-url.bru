@@ -1,0 +1,12 @@
+meta {
+  name: Get category (actual mounted URL)
+  type: http
+  seq: 2
+}
+get {
+  url: {{baseUrl}}/api/restaurants/categories/{{categoryId}}
+}
+tests { test("category found", function () { 
+  expect(res.getStatus()).to.equal(200); 
+  }); 
+}

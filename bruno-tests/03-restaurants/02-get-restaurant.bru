@@ -1,0 +1,22 @@
+meta {
+  name: Get restaurant (public)
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseUrl}}/api/restaurants/{{restaurantId}}
+  body: none
+  auth: none
+}
+
+vars:pre-request {
+  baseUrl: http://localhost:3002
+  restaurantId: 6abd88064d6ca12a57d7d3ad
+}
+
+tests {
+   test("restaurant found", function () { 
+  expect(res.getStatus()).to.equal(200); 
+  }); 
+}

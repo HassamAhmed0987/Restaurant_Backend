@@ -1,0 +1,28 @@
+meta {
+  name: Create restaurant as customer
+  type: http
+  seq: 3
+}
+post {
+  url: {{baseUrl}}/api/restaurants
+  body: json
+}
+headers {
+  authorization: Bearer {{customerToken}}
+  content-type: application/json
+}
+body:json {
+  {
+    "name": "Should Not Create", 
+    "phone": "+10000000000", 
+    "email": "forbidden@example.com", 
+    "address": "1 Test Street", 
+    "city": "Test City"
+  }
+}
+tests { 
+  test("forbidden", 
+  function () { 
+    expect(res.getStatus()).to.equal(403); 
+  }); 
+}

@@ -1,0 +1,27 @@
+meta {
+  name: Checkout (blocked by CUSTOMER role casing)
+  type: http
+  seq: 1
+}
+post {
+  url: {{baseUrl}}/api/orders
+  body: json
+}
+headers {
+  authorization: Bearer {{customerToken}}
+  content-type: application/json
+}
+body:json {
+  {
+    "deliveryAddress": "1 Test Street, Test City", 
+    "phone": "+10000000000", 
+    "paymentMethod": "COD", 
+    "notes": "Leave at door"
+  }
+}
+tests { 
+  test("current middleware rejects lowercase customer role", 
+  function () { 
+    expect(res.getStatus()).to.equal(403); 
+  }); 
+}

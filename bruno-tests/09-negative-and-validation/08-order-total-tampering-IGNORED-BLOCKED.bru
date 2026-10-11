@@ -1,0 +1,31 @@
+meta {
+  name: Checkout with client totals (ignored but role blocked)
+  type: http
+  seq: 8
+}
+post {
+  url: {{baseUrl}}/api/orders
+  body: json
+}
+headers {
+  authorization: Bearer {{customerToken}}
+  content-type: application/json
+}
+body:json {
+  {
+    "deliveryAddress": "1 Test Street", 
+    "phone": "+10000000000", 
+    "paymentMethod": "COD", 
+    "total": 0, 
+    "subtotal": 0, 
+    "deliveryFee": 0, 
+    "discount": 999999, 
+    "items": []
+  }
+}
+tests { 
+  test("current middleware rejects customer role before checkout", 
+  function () { 
+    expect(res.getStatus()).to.equal(403); 
+  }); 
+}

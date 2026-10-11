@@ -1,0 +1,15 @@
+meta { 
+  name: List menu items (unreachable; executes restaurant list); 
+  type: http; 
+  seq: 1 
+}
+get {
+  url: {{baseUrl}}/api/restaurants?restaurantId={{restaurantId}}&categoryId={{categoryId}}
+}
+tests { 
+  test("actual route result is restaurant list", 
+  function () { 
+    expect(res.getStatus()).to.equal(200); 
+    expect(res.getBody().data).to.be.an("array"); 
+  }); 
+}

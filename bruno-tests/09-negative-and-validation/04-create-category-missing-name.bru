@@ -1,0 +1,24 @@
+meta {
+  name: Create category missing name
+  type: http
+  seq: 4
+}
+post {
+  url: {{baseUrl}}/api/restaurants/{{restaurantId}}/categories
+  body: json
+}
+headers {
+  authorization: Bearer {{adminToken}}
+  content-type: application/json
+}
+body:json {
+  {
+    "description": "No name"
+  }
+}
+tests { 
+  test("category validation error", 
+  function () { 
+    expect(res.getStatus()).to.equal(400); 
+  }); 
+}
